@@ -104,18 +104,6 @@
 				<section
 					class="card-cont d-flex flex-wrap justify-content-center gap-3"
 				>
-					<!---
-				brand: "Ferrari",
-		model: "250 GTO",
-		year: 1962,
-		color: "Rouge",
-		price: 45000000,
-		mileage: 12000,
-		description: "Voiture de collection exceptionnelle",
-		imageUrl:
-			"https://cdn.ferrari.com/cms/network/media/img/resize/5d055246107b060e8f527a59",
-			
-			-->
 					<!-- doit être généré dynamiquement avec javascript  -->
 					<article class="card shadow-sm">
 						<a href="car.html?id=1">
@@ -132,15 +120,58 @@
 						</div>
 					</article>
 					<!-- jusqu'à ici  -->
-
-					<!-- effacer !  -->
 				</section>
+			</div>
+			<!-- Button trigger modal -->
+			<button
+				type="button"
+				class="btn btn-primary position-fixed bottom-0 end-0 m-4"
+				data-bs-toggle="modal"
+				data-bs-target="#exampleModal"
+			>
+				Add car
+			</button>
+
+			<!-- Modal -->
+			<div
+				class="modal fade"
+				id="exampleModal"
+				tabindex="-1"
+				aria-labelledby="exampleModalLabel"
+				aria-hidden="true"
+			>
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5" id="exampleModalLabel">
+								Modal title
+							</h1>
+							<button
+								type="button"
+								class="btn-close"
+								data-bs-dismiss="modal"
+								aria-label="Close"
+							></button>
+						</div>
+						<div class="modal-body">...</div>
+						<div class="modal-footer">
+							<button
+								type="button"
+								class="btn btn-secondary"
+								data-bs-dismiss="modal"
+							>
+								Close
+							</button>
+							<button type="button" class="btn btn-primary">
+								Save changes
+							</button>
+						</div>
+					</div>
+				</div>
 			</div>
 		</main>
 		<footer class="text-muted py-5">
-			<div class="container">
-				
-			</div>
+			<div class="container"></div>
 		</footer>
 
 		<script
