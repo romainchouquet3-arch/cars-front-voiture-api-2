@@ -44,24 +44,20 @@ async function createCar(carData) {
     }
 }
 
-/**
- * NOUVEAU : Fonction de suppression (PDF 6)
- */
 async function deleteCar(id) {
     try {
-        // Construction de l'URL : .../api/cars/123
         const url = `${API_CONFIG.baseURL}${API_CONFIG.endpoints.carById(id)}`;
         
         const response = await fetch(url, {
-            method: "DELETE" // Verbe HTTP important [cite: 93]
+            method: "DELETE"
         });
 
         if (!response.ok) throw new Error("Erreur lors de la suppression");
-        return true; // Succès
+        return true; 
     } catch (error) {
         console.error("Erreur deleteCar:", error);
         alert("Impossible de supprimer la voiture.");
-        return false; // Échec
+        return false; 
     }
 }
 
@@ -73,12 +69,10 @@ function showLoading(container) {
 
 function createCarCard(car) {
     const article = document.createElement('article');
-    article.className = 'card shadow-sm position-relative'; // position-relative pour ajustements futurs
+    article.className = 'card shadow-sm position-relative'; 
     
     const imageUrl = (car.imageUrl && car.imageUrl.startsWith('http')) ? car.imageUrl : 'https://via.placeholder.com/300x200?text=No+Image';
 
-    // Ajout du bouton "Supprimer" (btn-outline-danger) [cite: 131]
-    // On ajoute un attribut data-id pour retrouver l'ID au clic [cite: 140]
     article.innerHTML = `
         <a href="car.html?id=${car.id}">
             <img src="${imageUrl}" class="card-img-top object-fit-fill" alt="${car.brand}">
@@ -119,7 +113,7 @@ function displayCarDetails(car, container) {
     if (!container) return;
     const imageUrl = (car.imageUrl && car.imageUrl.startsWith('http')) ? car.imageUrl : 'https://via.placeholder.com/600x400?text=No+Image';
     
-    // Ajout du bouton supprimer aussi sur la page de détail
+
     container.innerHTML = `
         <article class="p-5 text-center bg-body-tertiary rounded-3">
             <h2 class="text-body-emphasis mb-5">${car.year} ${car.brand} ${car.model}</h2>
@@ -155,14 +149,11 @@ async function init() {
     const detailContainer = document.querySelector('main .container'); // Pour car.html
     
     // --- GESTION SUPPRESSION (Event Delegation) ---
-    // On écoute les clics sur tout le document pour attraper les boutons ".btn-delete"
-    // Voir PDF 6 - Page 3 (Event Delegation) [cite: 160-166]
+
     document.addEventListener('click', async (e) => {
-        // Si l'élément cliqué a la classe 'btn-delete'
         if (e.target.classList.contains('btn-delete')) {
             const id = e.target.dataset.id; // Récupère l'ID
-            
-            // 1. Confirmation [cite: 101]
+
             if (confirm("Êtes-vous sûr de vouloir supprimer cette voiture ? Action irréversible.")) {
                 
                 // 2. Appel API
