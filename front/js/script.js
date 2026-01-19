@@ -27,7 +27,6 @@ async function fetchCarById(id) {
     }
 }
 
-// Fonction pour ajouter une voiture (POST)
 async function createCar(carData) {
     try {
         const url = `${API_CONFIG.baseURL}${API_CONFIG.endpoints.cars}`;
@@ -36,38 +35,67 @@ async function createCar(carData) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(carData)
         });
-        if (!response.ok) throw new Error("Erreur lors de l'ajout");
+        if (!response.ok) throw new Error("Erreur ajout");
         return await response.json();
     } catch (error) {
         console.error("Erreur createCar:", error);
-        alert("Erreur lors de l'ajout. Vérifiez que le serveur est bien lancé.");
+        alert("Erreur lors de l'ajout.");
         return null;
+    }
+}
+
+/**
+ * NOUVEAU : Fonction de suppression (PDF 6)
+ */
+async function deleteCar(id) {
+    try {
+        // Construction de l'URL : .../api/cars/123
+        const url = `${API_CONFIG.baseURL}${API_CONFIG.endpoints.carById(id)}`;
+        
+        const response = await fetch(url, {
+            method: "DELETE" // Verbe HTTP important [cite: 93]
+        });
+
+        if (!response.ok) throw new Error("Erreur lors de la suppression");
+        return true; // Succès
+    } catch (error) {
+        console.error("Erreur deleteCar:", error);
+        alert("Impossible de supprimer la voiture.");
+        return false; // Échec
     }
 }
 
 // --- 2. FONCTIONS DOM ---
 
 function showLoading(container) {
-    if(container) container.innerHTML = '<div class="text-center my-5"><div class="spinner-border text-primary"></div><p class="mt-2">Chargement...</p></div>';
+    if(container) container.innerHTML = '<div class="text-center my-5"><div class="spinner-border text-primary"></div></div>';
 }
 
 function createCarCard(car) {
     const article = document.createElement('article');
-    article.className = 'card shadow-sm'; // Classes correspondant à votre CSS
+    article.className = 'card shadow-sm position-relative'; // position-relative pour ajustements futurs
     
-    // Gestion de l'image
     const imageUrl = (car.imageUrl && car.imageUrl.startsWith('http')) ? car.imageUrl : 'https://via.placeholder.com/300x200?text=No+Image';
 
+    // Ajout du bouton "Supprimer" (btn-outline-danger) [cite: 131]
+    // On ajoute un attribut data-id pour retrouver l'ID au clic [cite: 140]
     article.innerHTML = `
         <a href="car.html?id=${car.id}">
-            <img src="${imageUrl}" class="card-img-top object-fit-fill" alt="${car.brand} ${car.model}">
+            <img src="${imageUrl}" class="card-img-top object-fit-fill" alt="${car.brand}">
         </a>
         <div class="card-body">
             <h5 class="card-title">${car.brand} ${car.model}</h5>
             <p class="card-text text-truncate">${car.description || 'Pas de description'}</p>
-            <div class="d-flex justify-content-between align-items-center">
+            
+            <div class="d-flex justify-content-between align-items-center mt-3">
                 <span class="fw-bold text-primary">${car.price} €</span>
-                <a href="car.html?id=${car.id}" class="btn btn-primary">See more</a>
+                
+                <div class="btn-group">
+                    <a href="car.html?id=${car.id}" class="btn btn-sm btn-outline-primary">Détails</a>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="${car.id}">
+                        Supprimer
+                    </button>
+                </div>
             </div>
         </div>
     `;
@@ -77,14 +105,11 @@ function createCarCard(car) {
 function displayCars(cars) {
     const container = document.querySelector('.card-cont');
     if (!container) return;
-    
     container.innerHTML = ''; 
-    
     if (!cars || cars.length === 0) {
         container.innerHTML = '<div class="alert alert-warning w-100 text-center">Aucune voiture disponible.</div>';
         return;
     }
-    
     const fragment = document.createDocumentFragment();
     cars.forEach(car => fragment.appendChild(createCarCard(car)));
     container.appendChild(fragment);
@@ -94,7 +119,7 @@ function displayCarDetails(car, container) {
     if (!container) return;
     const imageUrl = (car.imageUrl && car.imageUrl.startsWith('http')) ? car.imageUrl : 'https://via.placeholder.com/600x400?text=No+Image';
     
-    // On remplace le contenu de l'article existant ou on l'injecte dans le conteneur
+    // Ajout du bouton supprimer aussi sur la page de détail
     container.innerHTML = `
         <article class="p-5 text-center bg-body-tertiary rounded-3">
             <h2 class="text-body-emphasis mb-5">${car.year} ${car.brand} ${car.model}</h2>
@@ -106,17 +131,15 @@ function displayCarDetails(car, container) {
                     <h3 class="mb-3">Spécifications</h3>
                     <table class="table table-striped">
                         <tbody>
-                            <tr><th scope="row">Marque</th><td>${car.brand}</td></tr>
-                            <tr><th scope="row">Modèle</th><td>${car.model}</td></tr>
-                            <tr><th scope="row">Année</th><td>${car.year}</td></tr>
-                            <tr><th scope="row">Couleur</th><td>${car.color}</td></tr>
-                            <tr><th scope="row">Kilométrage</th><td>${car.mileage} km</td></tr>
-                            <tr><th scope="row">Prix</th><td class="fw-bold">${car.price} €</td></tr>
-                            <tr><th scope="row">Description</th><td>${car.description || '-'}</td></tr>
+                            <tr><th>Marque</th><td>${car.brand}</td></tr>
+                            <tr><th>Modèle</th><td>${car.model}</td></tr>
+                            <tr><th>Année</th><td>${car.year}</td></tr>
+                            <tr><th>Prix</th><td class="fw-bold">${car.price} €</td></tr>
                         </tbody>
                     </table>
-                    <div class="mt-4 text-center">
-                         <a class="btn btn-secondary" href="./index.html">Retour à l'accueil</a>
+                    <div class="mt-4 d-flex justify-content-center gap-2">
+                         <a class="btn btn-secondary" href="./index.html">Retour</a>
+                         <button class="btn btn-danger btn-delete" data-id="${car.id}">Supprimer ce véhicule</button>
                     </div>
                 </div>
             </div>
@@ -128,24 +151,49 @@ function displayCarDetails(car, container) {
 
 async function init() {
     const isDetailsPage = window.location.pathname.includes('car.html');
-    // On cherche le conteneur principal (.card-cont pour l'accueil, .container pour le détail)
     const listContainer = document.querySelector('.card-cont');
-    const detailContainer = document.querySelector('main .container');
+    const detailContainer = document.querySelector('main .container'); // Pour car.html
+    
+    // --- GESTION SUPPRESSION (Event Delegation) ---
+    // On écoute les clics sur tout le document pour attraper les boutons ".btn-delete"
+    // Voir PDF 6 - Page 3 (Event Delegation) [cite: 160-166]
+    document.addEventListener('click', async (e) => {
+        // Si l'élément cliqué a la classe 'btn-delete'
+        if (e.target.classList.contains('btn-delete')) {
+            const id = e.target.dataset.id; // Récupère l'ID
+            
+            // 1. Confirmation [cite: 101]
+            if (confirm("Êtes-vous sûr de vouloir supprimer cette voiture ? Action irréversible.")) {
+                
+                // 2. Appel API
+                const success = await deleteCar(id);
+                
+                // 3. Mise à jour Interface [cite: 122]
+                if (success) {
+                    alert("Voiture supprimée !");
+                    // Si on est sur l'accueil, on recharge la liste
+                    if (!isDetailsPage && listContainer) {
+                        const cars = await fetchAllCars();
+                        displayCars(cars);
+                    } 
+                    // Si on est sur le détail, on renvoie vers l'accueil
+                    else {
+                        window.location.href = 'index.html';
+                    }
+                }
+            }
+        }
+    });
 
     if (isDetailsPage) {
         // === PAGE DÉTAIL ===
         if(detailContainer) showLoading(detailContainer);
-        
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
-        
         if (id) {
             const car = await fetchCarById(id);
-            if(car) {
-                displayCarDetails(car, detailContainer);
-            } else {
-                detailContainer.innerHTML = '<div class="alert alert-danger">Voiture introuvable.</div>';
-            }
+            if(car) displayCarDetails(car, detailContainer);
+            else detailContainer.innerHTML = '<div class="alert alert-danger">Non trouvé.</div>';
         }
     } else {
         // === PAGE ACCUEIL ===
@@ -154,22 +202,18 @@ async function init() {
             const cars = await fetchAllCars();
             displayCars(cars);
 
-            // === GESTION DU FORMULAIRE D'AJOUT ===
-            // ⚠️ CORRECTION ICI : Utilisation du bon ID 'carForm'
+            // Gestion Formulaire Ajout
             const form = document.getElementById('carForm'); 
-            
             if (form) {
                 form.addEventListener('submit', async (event) => {
-                    event.preventDefault(); // Empêche le rechargement de la page
-                    event.stopPropagation();
-
-                    // Validation Bootstrap basique
+                    event.preventDefault();
                     if (!form.checkValidity()) {
                         form.classList.add('was-validated');
                         return;
                     }
+                    const submitBtn = document.getElementById('submitCarBtn');
+                    submitBtn.disabled = true;
 
-                    // 1. Récupération de TOUS les champs
                     const carData = {
                         brand: document.getElementById('brand').value,
                         model: document.getElementById('model').value,
@@ -181,37 +225,17 @@ async function init() {
                         imageUrl: document.getElementById('imageUrl').value
                     };
 
-                    console.log("Envoi des données :", carData);
-
-                    // Désactiver le bouton pour éviter le double clic
-                    const submitBtn = document.getElementById('submitCarBtn');
-                    const originalBtnText = submitBtn.innerText;
-                    submitBtn.disabled = true;
-                    submitBtn.innerText = "Ajout en cours...";
-
-                    // 2. Appel API
                     const newCar = await createCar(carData);
-
-                    // 3. Gestion du résultat
                     if (newCar) {
-                        alert("Voiture ajoutée avec succès !");
-                        
-                        // Fermer le modal
-                        const modalEl = document.getElementById('exampleModal');
-                        const modal = bootstrap.Modal.getInstance(modalEl);
+                        alert("Ajouté !");
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
                         if(modal) modal.hide();
-
                         form.reset(); 
                         form.classList.remove('was-validated');
-                        
-                        // Rafraîchir la liste
                         const updatedCars = await fetchAllCars();
                         displayCars(updatedCars);
                     }
-                    
-                    // Réactiver le bouton
                     submitBtn.disabled = false;
-                    submitBtn.innerText = originalBtnText;
                 });
             }
         }
